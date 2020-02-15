@@ -1,0 +1,25 @@
+1. Implementing candlestick charts
+https://info.cloudquant.com/2019/08/candlestick_plotly/
+https://plot.ly/python/candlestick-charts/
+
+
+2. Implementing moving averages (Rolling Mean) and Return Deviation.
+
+Return Deviation can give an indication on how volatile the stock is and give a warning to the user if stock saw x% drop during x time period.
+
+Article also has good information about predicting stock prices
+
+https://towardsdatascience.com/in-12-minutes-stocks-analysis-with-pandas-and-scikit-learn-a8d8a7b50ee7
+
+3. Graphs showing stock history (using adj. close), Daily Change in price with the Adjusted Volume (number of shares) traded.
+
+https://towardsdatascience.com/stock-analysis-in-python-a0054e2c1a4c
+
+
+4. Using Stocker to: 
+
+4.1 Find significant changepoints and try to correlate with Google search trends
+4.2 Calculate profit from buy and hold strategy
+4.3 Predict future prices using the Prophet model
+
+https://github.com/WillKoehrsen/Data-Analysis/tree/master/stocker
