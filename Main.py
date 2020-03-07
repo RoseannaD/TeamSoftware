@@ -26,6 +26,12 @@ class Lstm_Parameters:
 
     def lr(self):
         return self.p_lr
+    
+class DataSet:
+    stock_name = None
+    start_date = None
+    end_date = None
+    stock_data = None
 
 
 DataSet_Obj.stock_code = input("Enter stock code: ")
