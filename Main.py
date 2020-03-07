@@ -109,7 +109,7 @@ while safe > 0:
 DataSet_Obj.stock_data = yf.download(DataSet_Obj.stock_code, DataSet_Obj.start_date, DataSet_Obj.end_date)
 
 # Calculate moving average
-mavg = stock_1['Adj Close'].rolling(window=100).mean()
+mavg = DataSet_Obj.stock_data['Adj Close'].rolling(window=100).mean()
 
 plt.plot(DataSet_Obj.stock_data["Open"]) # Plot Open
 plt.plot(DataSet_Obj.stock_data["High"]) # Plot High
