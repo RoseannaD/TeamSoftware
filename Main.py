@@ -3,6 +3,8 @@ import numpy as np
 import time
 import pickle
 from matplotlib import pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
 
 
 class DataSet:
