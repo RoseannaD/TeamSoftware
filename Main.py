@@ -5,6 +5,8 @@ import pickle
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
+from keras.layers import LSTM, Dense
+from keras import optimizers
 
 
 class DataSet:
