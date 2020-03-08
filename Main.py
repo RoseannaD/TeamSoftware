@@ -37,6 +37,26 @@ class DataSet:
     start_date = None
     end_date = None
     stock_data = None
+    
+class GenerateModel:
+    
+    Lstm_Parameters_Obj = Lstm_Parameters()
+    x_train_1 = None
+
+    def create_model(self):
+        # it is possible more layers (and different parameters) need to be added here. 
+        # need to complete rest of the code so a train vs test graph can be displayed before tweaking
+        model = Sequential()
+
+        model.add(LSTM(100, batch_input_shape=(self.Lstm_Parameters_Obj.batch_size(),
+                                               self.Lstm_Parameters_Obj.time_steps(), self.x_train_1.shape[2]),
+                       dropout=0.0, recurrent_dropout=0.0, stateful=True, return_sequences=True,
+                       kernel_initializer='random_uniform'))
+        model.add(Dense(1, activation='sigmoid'))
+        optimizer = optimizers.RMSprop(lr=Lstm_Parameters_Obj.lr())
+
+        model.compile(loss='mean_squared_error', optimizer=optimizer)
+        return model
 
 DataSet_Obj = DataSet()
 Lstm_Parameters_Obj = Lstm_Parameters()
