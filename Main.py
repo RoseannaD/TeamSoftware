@@ -141,3 +141,9 @@ scaler = MinMaxScaler()
 x_train = scaler.fit_transform(x_train_split)
 x_test = scaler.transform(x_test_split)
 
+# check for any values in train dataset that are not a number (NaN)
+if np.isnan(x_train).any() == False:
+    print("No NaNs are found in train and test datasets")
+else:
+    raise Exception("Dataset contains NaNs values which may affect the LSTM model.")
+
