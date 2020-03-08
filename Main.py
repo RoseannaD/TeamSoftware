@@ -36,6 +36,8 @@ class DataSet:
     end_date = None
     stock_data = None
 
+DataSet_Obj = DataSet()
+Lstm_Parameters_Obj = Lstm_Parameters()
 
 DataSet_Obj.stock_code = input("Enter stock code: ")
 
@@ -111,6 +113,7 @@ DataSet_Obj.stock_data = yf.download(DataSet_Obj.stock_code, DataSet_Obj.start_d
 # Calculate moving average
 mavg = DataSet_Obj.stock_data['Adj Close'].rolling(window=100).mean()
 
+# display graph of historical data
 plt.plot(DataSet_Obj.stock_data["Open"]) # Plot Open
 plt.plot(DataSet_Obj.stock_data["High"]) # Plot High
 plt.plot(DataSet_Obj.stock_data["Low"]) # Plot Low
@@ -120,3 +123,19 @@ plt.title('{} stock price'.format(DataSet_Obj.stock_data.upper())) # Graph title
 plt.ylabel('Price')  # Y-axis label
 plt.legend(['Open','High','Low','Close','Moving Avg'], loc='upper left') #Legend
 plt.show() #Display graph
+
+# split stock_data into two datasets (training and test) with a 80/20 split
+x_train_split, x_test_split = train_test_split(DataSet_Obj.stock_data, train_size=0.8, test_size=0.2, shuffle=False)
+
+# check if the training dataset is big enough that is needed to create a model. If not, exit the application
+if len(x_train_split) > 2500:
+    print("Sufficient data available for training")
+else:
+    sys.exit("Not enough data available for training \n Please try choosing a longer date duration. \n If this is not"
+             " possible due to the stock being a relatively new, please choose another stock")
+
+# scale dataset betwen 0 and 1 
+scaler = MinMaxScaler()
+x_train = scaler.fit_transform(x_train_split)
+x_test = scaler.transform(x_test_split)
+
