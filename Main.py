@@ -112,6 +112,10 @@ while safe > 0:
 # Retrieve stock data
 DataSet_Obj.stock_data = yf.download(DataSet_Obj.stock_code, DataSet_Obj.start_date, DataSet_Obj.end_date)
 
+# Check if stock data was successfully imported
+if len(DataSet_Obj.stock_data) == 0:
+    raise Exception("No data found, please try another stock")
+
 # Calculate moving average
 mavg = DataSet_Obj.stock_data['Adj Close'].rolling(window=100).mean()
 
