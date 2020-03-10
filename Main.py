@@ -8,12 +8,6 @@ from sklearn.model_selection import train_test_split
 from keras.layers import LSTM, Dense
 from keras import optimizers
 
-
-class DataSet:
-    stock_name = None
-    start_date = None
-    end_date = None
-    stock_code = None
        
 class Lstm_Parameters:
     # parameters for LSTM
