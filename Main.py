@@ -1,3 +1,5 @@
+# need to use Python 3.7.5 due to tensorflow. 
+
 import yfinance as yf
 import numpy as np
 import time
