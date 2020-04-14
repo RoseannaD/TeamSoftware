@@ -1,171 +1,195 @@
 # need to use Python 3.7.5 due to tensorflow. 
 
 import yfinance as yf
+import pandas as pd
 import numpy as np
-import time
-import pickle
-from matplotlib import pyplot as plt
+from keras.models import Sequential, load_model
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from keras.layers import LSTM, Dense
-from keras import optimizers
+from matplotlib import pyplot as plt
 
-       
-class Lstm_Parameters:
-    # parameters for LSTM
-    p_epochs = None
-    p_time_steps = None
-    p_batch_size = None
-    p_lr = None
+#global variable to store user's stock they want to analyse using LSTM
+selected_stock_var = 0
 
-    def epochs(self):
-        return self.p_epochs
+#global variable to store predictions
+forecast = "a"
 
-    def time_steps(self):
-        return self.p_time_steps
+class parameters:
 
-    def batch_size(self):
-        return self.p_batch_size
+    time_steps = 15 #how many days of historical data to look back at to predict the next day's price
+    future_days = 30 #how many days to predict ahead of the last date from the training dataset
 
-    def lr(self):
-        return self.p_lr
-    
-class DataSet:
-    stock_name = None
-    start_date = None
-    end_date = None
-    stock_data = None
-    
-class GenerateModel:
-    
-    Lstm_Parameters_Obj = Lstm_Parameters()
-    x_train_1 = None
+class dataset:
 
-    def create_model(self):
-        # it is possible more layers (and different parameters) need to be added here. 
-        # need to complete rest of the code so a train vs test graph can be displayed before tweaking
-        model = Sequential()
+    def get_data(self):
+        global selected_stock_var
 
-        model.add(LSTM(100, batch_input_shape=(self.Lstm_Parameters_Obj.batch_size(),
-                                               self.Lstm_Parameters_Obj.time_steps(), self.x_train_1.shape[2]),
-                       dropout=0.0, recurrent_dropout=0.0, stateful=True, return_sequences=True,
-                       kernel_initializer='random_uniform'))
-        model.add(Dense(1, activation='sigmoid'))
-        optimizer = optimizers.RMSprop(lr=Lstm_Parameters_Obj.lr())
+        #get historical data for selected stock
+        #AMD stock
+        if selected_stock_var == "AMD":
+            stock_code = "AMD"
+            start_date = "2005-01-01"
+            end_date = "2020-04-10"  # 2020-04-09
 
-        model.compile(loss='mean_squared_error', optimizer=optimizer)
-        return model
+            df = yf.download(stock_code, start_date, end_date)
+            return df
 
-DataSet_Obj = DataSet()
-Lstm_Parameters_Obj = Lstm_Parameters()
+        #PFE stock
+        if selected_stock_var == "PFE":
+            stock_code = "PFE"
+            start_date = "2005-01-01"
+            end_date = "2020-04-10"  # 2020-04-09
 
-DataSet_Obj.stock_code = input("Enter stock code: ")
+            df = yf.download(stock_code, start_date, end_date)
+            return df
 
-safe = 1
+        #RYCEY stock
+        if selected_stock_var == "RYCEY":
+            stock_code = "RYCEY"
+            start_date = "2005-01-01"
+            end_date = "2020-04-13"  # 2020-04-09
 
-DataSet_Obj.start_date = input("Enter start date: ")
+            df = yf.download(stock_code, start_date, end_date)
+            return df
 
-# Basic date check doesn't account for leap years
-while safe > 0:
-    safe = 0
-    # check start date
-    if DataSet_Obj.start_date[4] != "-":
-        print("Invalid Format YYYY-MM-DD")
-        correct = correct + 1
-    if DataSet_Obj.start_date[4] == "-":
-        data = DataSet_Obj.start_date.split("-")
-        num0 = int(data[0])
-        num2 = int(data[1])
-        num1 = int(data[2])
-        if (num1 < 1 or num1 > 12):
-            safe = safe + 1
 
-        if (num1 == 1 or num1 == 3 or num1 == 5 or num1 == 7 or num1 == 8 or num1 == 10 or num1 == 12):
-            if (num2 < 1 or num2 > 31):
-                safe = safe + 1
+class prepare_data:
 
-        if (num1 == 4 or num1 == 6 or num1 == 9 or num1 == 11):
-            if (num2 < 1 or num2 > 30):
-                safe = safe + 1
-        if (num1 == 2):
-            if (num2 < 1 or num2 > 28):
-                safe = safe + 1
+    #create class objects
+    parameters_obj = parameters()
+    dataset_obj = dataset()
 
-        if (num0 > 2020 or num0 < 1990):
-            safe = safe + 1
+    df = dataset_obj.get_data()
 
-DataSet_Obj.end_date = input("Enter end date: ")
+    scaler = None
+    close_df = None
+    close_test = None
+    date_test = None
+    close_train = None
+    close_train_val = None
+    date_train = None
+    date_val = None
+    x_close_train = None
+    x_close_test = None
 
-# Basic date check doesn't account for leap years
-safe = 1
-while safe > 0:
-    DataSet_Obj.end_date = input("Enter end date: ")
-    safe = 0
-    # check end date
-    if DataSet_Obj.end_date[4] != "-":
-        print("Invalid Format YYYY-MM-DD")
-        correct = correct + 1
-    if DataSet_Obj.end_date[4] == "-":
-        data = DataSet_Obj.end_date.split("-")
-        num0 = int(data[0])
-        num2 = int(data[1])
-        num1 = int(data[2])
-        if (num1 < 1 or num1 > 12):
-            safe = safe + 1
+    selected_stock = None
 
-        if (num1 == 1 or num1 == 3 or num1 == 5 or num1 == 7 or num1 == 8 or num1 == 10 or num1 == 12):
-            if (num2 < 1 or num2 > 31):
-                safe = safe + 1
+    def load_correct_model(self):
 
-        if (num1 == 4 or num1 == 6 or num1 == 9 or num1 == 11):
-            if (num2 < 1 or num2 > 30):
-                safe = safe + 1
-        if (num1 == 2):
-            if (num2 < 1 or num2 > 28):
-                safe = safe + 1
+        global selected_stock_var
 
-        if (num0 > 2020 or num0 < 1990):
-            safe = safe + 1
+        #load the correct model based on the selected stock
+        if selected_stock_var == "AMD":
+            self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
+                           'dropout_layers_0.4_0.4/best_model.h5')
 
-# Retrieve stock data
-DataSet_Obj.stock_data = yf.download(DataSet_Obj.stock_code, DataSet_Obj.start_date, DataSet_Obj.end_date)
+        if selected_stock_var == "PFE":
+            self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
+                           'dropout_layers_0.4_0.4/best_model.h5')
 
-# Check if stock data was successfully imported
-if len(DataSet_Obj.stock_data) == 0:
-    raise Exception("No data found, please try another stock")
+        if selected_stock_var == "RYCEY":
+            self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
+                           'dropout_layers_0.4_0.4/best_model.h5')
 
-# Calculate moving average
-mavg = DataSet_Obj.stock_data['Adj Close'].rolling(window=100).mean()
 
-# display graph of historical data
-plt.plot(DataSet_Obj.stock_data["Open"]) # Plot Open
-plt.plot(DataSet_Obj.stock_data["High"]) # Plot High
-plt.plot(DataSet_Obj.stock_data["Low"]) # Plot Low
-plt.plot(DataSet_Obj.stock_data["Close"]) # Plot Close
-plt.plot(mavg) # Plot Moving Average
-plt.title('{} stock price'.format(DataSet_Obj.stock_data.upper())) # Graph title
-plt.ylabel('Price')  # Y-axis label
-plt.legend(['Open','High','Low','Close','Moving Avg'], loc='upper left') #Legend
-plt.show() #Display graph
+    def manipulate_raw_data(self):
+        #convert raw dataset's index to a column
+        self.df = self.dataset_obj.get_data()
+        self.df['Date'] = self.df.index
 
-# split stock_data into two datasets (training and test) with a 80/20 split
-x_train_split, x_test_split = train_test_split(DataSet_Obj.stock_data, train_size=0.8, test_size=0.2, shuffle=False)
+        #drop data that is not needed from dataset
+        self.df.drop(columns=['Open', 'High', 'Low', 'Adj Close', 'Volume'], inplace=True)
 
-# check if the training dataset is big enough that is needed to create a model. If not, exit the application
-if len(x_train_split) > 2500:
-    print("Sufficient data available for training")
-else:
-    sys.exit("Not enough data available for training \n Please try choosing a longer date duration. \n If this is not"
-             " possible due to the stock being a relatively new, please choose another stock")
+        #store close prices from dataset to close_data variable
+        self.close_df = self.df['Close'].values
+        self.close_df = self.close_df.reshape((-1,1))
 
-# scale dataset betwen 0 and 1 
-scaler = MinMaxScaler()
-x_train = scaler.fit_transform(x_train_split)
-x_test = scaler.transform(x_test_split)
+    def split_data(self):
+        # split stock_data into two datasets (training, val and test) with a 80/20(training/test) split on raw data, then
+        #training is split again to create val
+        close_train_old, self.close_test = train_test_split(self.close_df, train_size=0.8, test_size=0.2, shuffle=False)
+        date_train_old, self.date_test = train_test_split(self.df['Date'], train_size=0.8, test_size=0.2, shuffle=False)
 
-# check for any values in train dataset that are not a number (NaN)
-if np.isnan(x_train).any() == False:
-    print("No NaNs are found in train and test datasets")
-else:
-    raise Exception("Dataset contains NaNs values which may affect the LSTM model.")
+        self.close_train, self.close_train_val = train_test_split(close_train_old, train_size=0.8, test_size=0.2, shuffle=False)
+        self.date_train, self.date_val = train_test_split(date_train_old, train_size=0.8, test_size=0.2, shuffle=False)
 
+    def normalise_data(self):
+        #scale the feature MinMax, build array
+        x = self.close_train
+        self.scaler = MinMaxScaler()
+        self.x_close_train = self.scaler.fit_transform(x)
+        self.x_close_test = self.scaler.transform(self.close_test)
+
+    #forecast = None
+    forecast_dates = None
+
+
+    def predict(self, future_days, model):
+        close_data_1 = self.scaler.transform(self.close_df.reshape(-1, 1))
+
+        prediction_list = close_data_1[-self.parameters_obj.time_steps:]
+
+        for _ in range(future_days):
+            x = prediction_list[-self.parameters_obj.time_steps:]
+            x = x.reshape((1, self.parameters_obj.time_steps, 1))
+            out = model.predict(x)[0][0]
+            prediction_list = np.append(prediction_list, out)
+        prediction_list = prediction_list[self.parameters_obj.time_steps - 1:]
+
+        return prediction_list
+
+    def predict_dates(self, future_days):
+        last_date = self.df['Date'].values[-1]
+        prediction_dates = pd.date_range(last_date, periods=future_days + 1).tolist()
+        return prediction_dates
+
+    def generate_predictions(self):
+        global forecast
+        #generate predictions using saved model
+        forecast = np.array(self.predict(self.parameters_obj.future_days, self.model)).reshape(-1, 1)
+        self.forecast_dates = self.predict_dates(self.parameters_obj.future_days)
+
+    def inverse_transform(self):
+        global forecast
+        #undo scaling from -1 to 1 into readable values
+        self.close_test = self.scaler.inverse_transform(self.x_close_test.reshape(-1, 1))
+        forecast = self.scaler.inverse_transform(forecast)
+
+    def graphing(self):
+        global forecast
+        # build and display graph
+        plt.figure()
+        plt.plot(self.df['Date'], self.close_df, color='black')
+        plt.plot(self.forecast_dates, forecast, color='blue')
+        plt.legend(['Historical Data', 'Forecast'], loc='upper left')  # Legend
+        plt.show()
+
+    def convert_df_export(self):
+        global forecast
+
+        forecast = pd.DataFrame(data=forecast, index=[self.forecast_dates],
+                             columns=["LSTM Predictions"]).rename_axis("Date")
+
+        forecast['Date'] = forecast.index
+
+        # swap coloumn positions
+        columns_titles = ["Date", "LSTM Prediction"]
+        forecast = forecast.reindex(columns=columns_titles)
+
+class Compile:
+    #create class objects
+    parameters_obj = parameters()
+    dataset_obj = dataset()
+    prepare_data_obj = prepare_data()
+
+    def compile_predictions_lstm(self):
+
+        self.dataset_obj.get_data()
+        self.prepare_data_obj.load_correct_model()
+        self.prepare_data_obj.manipulate_raw_data()
+        self.prepare_data_obj.split_data()
+        self.prepare_data_obj.normalise_data()
+        self.prepare_data_obj.generate_predictions()
+        self.prepare_data_obj.inverse_transform()
+        self.prepare_data_obj.graphing()
+        self.prepare_data_obj.convert_df_export()
