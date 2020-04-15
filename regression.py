@@ -125,7 +125,7 @@ class prepare_data():
         self.svm_prediction = self.svr_rbf.predict(x_prediction)
 
         #create future dates and add to dataframe
-        self.future_dates = pd.bdate_range(pd.datetime.today(), periods=30, weekmask=None)
+        self.future_dates = pd.bdate_range(pd.datetime.today(), periods=parameters_obj.future_days, weekmask=None)
 
         global lr_df
         global svm_df
