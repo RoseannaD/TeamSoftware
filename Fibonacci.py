@@ -13,12 +13,15 @@ class Dataset:
         global stock_code
         global end_date
 
+        #raise exception if no stock code is entered
+        if len(end_date) == 0:
+            raise ValueError("End date is missing")
+
         # parse current date in the right format
         # end_date = date.today()
         end_date = parser.parse(end_date)
 
         # minus 6 months from current date and convert to correct format
-        start_date = end_date
         start_date = end_date - dateutil.relativedelta.relativedelta(months=6)
         start_date = (start_date.strftime("%Y-%m-%d"))
 
@@ -26,6 +29,10 @@ class Dataset:
         end_date = (end_date.strftime("%Y-%m-%d"))
         # print (end_date)
         # print (self.DataSet_Obj.start_date)
+
+        #raise exception if no stock code is entered
+        if len(stock_code) == 0:
+            raise ValueError("Enter a stock code")
 
         # Retrieve stock data
         stock_data = yf.download(stock_code, start_date, end_date)
