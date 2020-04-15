@@ -3,6 +3,7 @@ from dateutil import parser
 import dateutil.relativedelta
 from matplotlib import pyplot as plt
 import ta
+import socket
 
 start_date = "01-01-2019"
 end_date = "31-12-2019"
@@ -17,7 +18,7 @@ will_r = "a"
 
 class Dataset:
 
-        def get_data(self):
+    def get_data(self):
         global stock_code
         global end_date
         global start_date
@@ -134,6 +135,20 @@ class Prepare_data:
 class Compile:
     prepare_data_obj = Prepare_data()
 
+    # function to check internet conectivity by pinging Google's DNS server
+    def internet_check(self, host="8.8.8.8", port=53, timeout=3):
+        """
+        Host: 8.8.8.8 (google-public-dns-a.google.com)
+        OpenPort: 53/tcp
+        Service: domain (DNS/TCP)
+        """
+        try:
+            socket.setdefaulttimeout(timeout)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+            return True
+        except socket.error as ex:
+            return False
+
     def compile_analysis(self):
         global period
         global bb
@@ -144,27 +159,31 @@ class Compile:
         self.prepare_data_obj.retrive_dataset()
         self.prepare_data_obj.add_timestamp_df()
 
-        if bb == 1:
-            self.prepare_data_obj.bollinger_bands()
-            self.prepare_data_obj.graphing_all_bb()
-            print("BB")
+        if self.internet_check() == 0:
+            raise Exception("No internet connectivity")
+        else:
 
-        if roi == 1:
-            # raise exception if no stock code is entered
-            if len(str(period)) == 0:
-                raise ValueError("Period is missing")
-            self.prepare_data_obj.rate_of_change()
-            self.prepare_data_obj.graphing_roi()
-            print("ROI")
+            if bb == 1:
+                self.prepare_data_obj.bollinger_bands()
+                self.prepare_data_obj.graphing_all_bb()
+                print("BB")
 
-        if atr == 1:
-            if len(str(period)) == 0:
-                raise ValueError("Period is missing")
-            self.prepare_data_obj.average_true_range()
-            self.prepare_data_obj.graphing_average_true_range()
+            if roi == 1:
+                # raise exception if no stock code is entered
+                if len(str(period)) == 0:
+                    raise ValueError("Period is missing")
+                self.prepare_data_obj.rate_of_change()
+                self.prepare_data_obj.graphing_roi()
+                print("ROI")
 
-        if will_r == 1:
-            if len(str(period)) == 0:
-                raise ValueError("Period is missing")
-            self.prepare_data_obj.williams_r()
-            self.prepare_data_obj.graphing_williams_r()
+            if atr == 1:
+                if len(str(period)) == 0:
+                    raise ValueError("Period is missing")
+                self.prepare_data_obj.average_true_range()
+                self.prepare_data_obj.graphing_average_true_range()
+
+            if will_r == 1:
+                if len(str(period)) == 0:
+                    raise ValueError("Period is missing")
+                self.prepare_data_obj.williams_r()
+                self.prepare_data_obj.graphing_williams_r()
