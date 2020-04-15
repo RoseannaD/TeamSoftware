@@ -17,7 +17,7 @@ will_r = "a"
 
 class Dataset:
 
-    def get_data(self):
+        def get_data(self):
         global stock_code
         global end_date
         global start_date
@@ -35,15 +35,6 @@ class Dataset:
         #start_date = end_date - dateutil.relativedelta.relativedelta(months=6)
         start_date = parser.parse(start_date, dayfirst=True)
 
-        #raise exception if the two dates are less than one month apart
-        if (end_date - start_date).days < 30:
-            raise Exception("Dates need to be at least 1 month apart")
-
-        #convert date into correct format
-        start_date = (start_date.strftime("%Y-%m-%d"))
-
-        # convert current date to correct format
-        end_date = (end_date.strftime("%Y-%m-%d"))
         # print (end_date)
         # print (self.DataSet_Obj.start_date)
 
@@ -51,9 +42,19 @@ class Dataset:
         if end_date < start_date is not True:
             raise Exception("Start date cannot be before end date.")
 
+        #raise exception if the two dates are less than one month apart
+        if (end_date - start_date).days < 30:
+            raise Exception("Dates need to be at least 1 month apart")
+
         #raise exception if no stock code is entered
         if len(stock_code) == 0:
             raise ValueError("Enter a stock code")
+
+        #convert date into correct format
+        start_date = (start_date.strftime("%Y-%m-%d"))
+
+        # convert current date to correct format
+        end_date = (end_date.strftime("%Y-%m-%d"))
 
         # Retrieve stock data
         stock_data = yf.download(stock_code, start_date, end_date)
