@@ -15,11 +15,13 @@ limitations under the License.
 """""
 
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, font
 import traceback
 from PIL import ImageTk, Image
 import socket
 from openpyxl import Workbook
+import sys
+
 
 import regression as rg
 import lstm as lstm
@@ -56,9 +58,11 @@ class App(tk.Tk):
         error = traceback.format_exception(*args)
         #messagebox.showerror('Exception', error)
 
-        title = 'Traceback Error'
-        message = "An error has occurred: '{}'.".format(error)
+        title = 'Error'
         detail = traceback.format_exc()
+
+        sys.tracebacklimit = 0
+        message = traceback.format_exc()
 
         TopErrorWindow(title, message, detail)
 
@@ -66,20 +70,21 @@ class App(tk.Tk):
 
     def switch_frame(self, frame_class):
         new_frame = frame_class(self)
-        if self._frame is not None:
-            self._frame.destroy()
-
-        self._frame = new_frame
-        self._frame.grid()
-
         #internet connectivity check
         if self.internet_check() == 0:
             messagebox.showerror("Error", "No internet connectivity. Please check your network settings")
+        else:
+            if self._frame is not None:
+                self._frame.destroy()
+
+            self._frame = new_frame
+            self._frame.grid()
+
+
 
 class StartPage(tk.Frame):
-       
-    #need to change to relative path
-    logo_img = "/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/Source/assets/futuremetric.png" 
+
+    logo_img = "/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/Source/assets/futuremetric.png"
     logo_img_resized = None
 
     def __init__(self, master):
@@ -127,9 +132,8 @@ class LSTM(tk.Frame):
     compile = lstm.Compile()
 
     def export_excel(self):
-        #global file_location
+        self.compile.prepare_data_obj.convert_df_export()
         file_location = filedialog.asksaveasfilename(defaultextension='.xlsx')
-
         lstm.forecast.to_excel(file_location, index = False, header=True)
 
     def __init__(self, master):
@@ -174,9 +178,14 @@ class Regression(tk.Frame):
 
 
     def export_excel(self):
-        #global file_location
-        file_location = filedialog.asksaveasfilename(defaultextension='.xlsx') #filedialog.askdirectory()
-        rg.svm_df.to_excel(file_location, index = False, header=True)
+        self.compile.compile_predictions_regression_export(self.e_stock_code.get())
+        file_location = filedialog.asksaveasfilename(defaultextension='.xlsx')
+
+        #check which model has a higher confidence and saves the higher
+        if rg.svm_confidence > rg.lr_confidence:
+            rg.svm_df.to_excel(file_location, index = False, header=True)
+        else:
+            rg.lr_df.to_excel(file_location, index=False, header=True)
 
     def compile_regression(self):
 
@@ -196,10 +205,13 @@ class Regression(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
 
+        #label
+        tk.Label(self, text='SVM & LR', font='Helvetica 18 bold').grid(row=0, column=0)
+
         #enter stock code label
-        tk.Label(self, text="Enter stock code").grid(row=1, column=0)
+        tk.Label(self, text="Enter stock code").grid(row=2, column=0)
         self.e_stock_code = tk.Entry(self)
-        self.e_stock_code.grid(row=1, column=1)
+        self.e_stock_code.grid(row=2, column=1)
 
         #show graph
         show_graph = tk.Button(self, text="Graph data", command=lambda: self.compile_regression())
@@ -213,6 +225,10 @@ class Regression(tk.Frame):
         tk.Button(self, text="Go back to start page",
                   command=lambda: master.switch_frame(StartPage))
 
+        #label
+        tk.Label(self, text='Both SVM & LR models will be calculated and the model \n'
+                            'with the highest confidence will be displayed').grid(row=6, column=0)
+
         #button to go back to home screen
         tk.Button(self, text="Home", command=lambda: master.switch_frame(StartPage)).grid(row=7, column=1)
 
@@ -223,17 +239,22 @@ class Fibonacci(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
 
+        #label
+        tk.Label(self, text='Fibonacci retracement', font='Helvetica 18 bold').grid(row=0, column=0)
 
-        # enter stock code label
-        tk.Label(self, text="Enter stock code").grid(row=1, column=0)
+        #enter stock code label
+        tk.Label(self, text="Enter stock code", font='TkDefaultFont 14').grid(row=2, column=0, sticky=tk.E)
         stock_code = tk.Entry(self)
-        stock_code.grid(row=1, column=1)
-        # e_stock_code = e_stock_code.get()
+        stock_code.grid(row=2, column=1)
 
-        # enter end date label
-        tk.Label(self, text="Enter end date").grid(row=2, column=0)
+        #enter end date label
+        tk.Label(self, text="Enter end date", font='TkDefaultFont 14').grid(row=3, column=0, sticky=tk.E)
         end_date = tk.Entry(self)
-        end_date.grid(row=2, column=1)
+        end_date.grid(row=3, column=1)
+
+        #label
+        tk.Label(self, text="The start date is calculated by subtracting 6 months from \n the end date").grid(row=4, column=0)
+
 
         def compile_fib():
             fib.stock_code = stock_code.get()
@@ -350,6 +371,9 @@ class License(tk.Frame):
                             See the License for the specific language governing permissions and limitations under the 
                             License.""").grid(row=2, column=5)
 
+        # button to go back to home screen
+        tk.Button(self, text="Home", command=lambda: master.switch_frame(StartPage)).grid(row=3, column=5)
+
 class TopErrorWindow(tk.Toplevel):
     def __init__(self, title, message, detail):
         #code to “show details” button to a tkinter messagebox from Mike - SMT at Stackoverflow
@@ -358,9 +382,9 @@ class TopErrorWindow(tk.Toplevel):
         tk.Toplevel.__init__(self)
         self.details_expanded = False
         self.title(title)
-        self.geometry('350x75')
-        self.minsize(350, 75)
-        self.maxsize(425, 250)
+        self.geometry('350x95')
+        self.minsize(350, 95)
+        self.maxsize(425, 300)
         self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
@@ -389,16 +413,15 @@ class TopErrorWindow(tk.Toplevel):
         if self.details_expanded:
             self.textbox.grid_forget()
             self.scrollb.grid_forget()
-            self.geometry('350x75')
+            self.geometry('350x95')
             self.details_expanded = False
         else:
             self.textbox.grid(row=0, column=0, sticky='nsew')
             self.scrollb.grid(row=0, column=1, sticky='nsew')
-            self.geometry('350x160')
+            self.geometry('350x190')
             self.details_expanded = True
 
 
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
