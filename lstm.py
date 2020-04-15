@@ -80,14 +80,17 @@ class prepare_data:
 
         #load the correct model based on the selected stock
         if selected_stock_var == "AMD":
+            #need to change to relative path and load correct model
             self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
                            'dropout_layers_0.4_0.4/best_model.h5')
 
         if selected_stock_var == "PFE":
+            #need to change to relative path and load correct model
             self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
                            'dropout_layers_0.4_0.4/best_model.h5')
 
         if selected_stock_var == "RYCEY":
+            #need to change to relative path
             self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
                            'dropout_layers_0.4_0.4/best_model.h5')
 
