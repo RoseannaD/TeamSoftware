@@ -3,6 +3,7 @@ from dateutil import parser
 import dateutil.relativedelta
 from matplotlib import pyplot as plt
 from datetime import *
+import socket
 
 stock_code = "MSFT"
 end_date = "2020/04/07"
@@ -55,6 +56,9 @@ class Prepare_Data:
 
     def retrive_dataset(self):
         self.df = self.DataSet_Obj.get_data()
+        # raise exception if no data exists
+        if len(self.df) == 0:
+            raise ValueError("No data found, please try another stock")
 
     def calculate_fib(self):
 
@@ -81,9 +85,26 @@ class Prepare_Data:
 
 class Compile:
 
-    def compile_fibonacci(self):
-        prepare_data_obj = Prepare_Data()
+    # function to check internet conectivity by pinging Google's DNS server
+    def internet_check(self, host="8.8.8.8", port=53, timeout=3):
+        """
+        Host: 8.8.8.8 (google-public-dns-a.google.com)
+        OpenPort: 53/tcp
+        Service: domain (DNS/TCP)
+        """
+        try:
+            socket.setdefaulttimeout(timeout)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+            return True
+        except socket.error as ex:
+            return False
 
-        prepare_data_obj.retrive_dataset()
-        prepare_data_obj.calculate_fib()
-        prepare_data_obj.graphing()
+    def compile_fibonacci(self):
+        if self.internet_check() == 0:
+            raise Exception("No internet connectivity")
+        else:
+            prepare_data_obj = Prepare_Data()
+
+            prepare_data_obj.retrive_dataset()
+            prepare_data_obj.calculate_fib()
+            prepare_data_obj.graphing()
