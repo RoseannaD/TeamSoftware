@@ -22,19 +22,38 @@ class Dataset:
         global end_date
         global start_date
 
+        #raise exception if no stock code is entered
+        if len(start_date) == 0 or len(end_date) == 0:
+            raise ValueError("Start or end date is missing")
+
         # parse current date in the right format
         # end_date = date.today()
-        end_date = parser.parse(end_date)
+        #end_date = parser.parse(end_date)
+        end_date = parser.parse(end_date, dayfirst=True)
 
         # minus 6 months from current date and convert to correct format
-        start_date = end_date
-        start_date = end_date - dateutil.relativedelta.relativedelta(months=6)
+        #start_date = end_date - dateutil.relativedelta.relativedelta(months=6)
+        start_date = parser.parse(start_date, dayfirst=True)
+
+        #raise exception if the two dates are less than one month apart
+        if (end_date - start_date).days < 30:
+            raise Exception("Dates need to be at least 1 month apart")
+
+        #convert date into correct format
         start_date = (start_date.strftime("%Y-%m-%d"))
 
         # convert current date to correct format
         end_date = (end_date.strftime("%Y-%m-%d"))
         # print (end_date)
         # print (self.DataSet_Obj.start_date)
+
+        #check if start date is before end date
+        if end_date < start_date is not True:
+            raise Exception("Start date cannot be before end date.")
+
+        #raise exception if no stock code is entered
+        if len(stock_code) == 0:
+            raise ValueError("Enter a stock code")
 
         # Retrieve stock data
         stock_data = yf.download(stock_code, start_date, end_date)
@@ -115,6 +134,7 @@ class Compile:
     prepare_data_obj = Prepare_data()
 
     def compile_analysis(self):
+        global period
         global bb
         global roi
         global atr
@@ -129,14 +149,21 @@ class Compile:
             print("BB")
 
         if roi == 1:
+            # raise exception if no stock code is entered
+            if len(str(period)) == 0:
+                raise ValueError("Period is missing")
             self.prepare_data_obj.rate_of_change()
             self.prepare_data_obj.graphing_roi()
             print("ROI")
 
         if atr == 1:
+            if len(str(period)) == 0:
+                raise ValueError("Period is missing")
             self.prepare_data_obj.average_true_range()
             self.prepare_data_obj.graphing_average_true_range()
 
         if will_r == 1:
+            if len(str(period)) == 0:
+                raise ValueError("Period is missing")
             self.prepare_data_obj.williams_r()
             self.prepare_data_obj.graphing_williams_r()
