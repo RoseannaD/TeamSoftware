@@ -1,17 +1,32 @@
+import pandas as pd
+import yfinance as yf
+import dateutil.relativedelta
+from datetime import *
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
+from sklearn.model_selection import train_test_split
+from matplotlib import pyplot as plt
+
+#global var to store stock code user wants to analyse using regression
+stock_name = "MSFT"
+
+#global var to store dataset
+lr_df = "a"
+svm_df = "a"
+#global var to store confidence level
+confidence = 0
+
+
 class parameters:
-    # A variable for predicting 'forecast_out' days out into the future
-    future_days = 30 # 'n=30' days
+    #how many days to predict ahead of the last date from the training dataset
+    future_days = 30
 
 class DataSet:
-    stock_name = None
-    start_date = None
-    end_date = None
-    stock_data = None
 
-    def get_data(self, stock_code):
-        #parse current date in the right format
-        #DataSet_Obj.end_date = input("Enter current date: ")
-        #DataSet_Obj.end_date = parser.parse(DataSet_Obj.end_date)
+    def get_data(self):
+        global stock_name
+
         end_date = date.today()
 
         #minus 6 months from current date and convert to correct format
@@ -21,8 +36,12 @@ class DataSet:
         #convert current date to correct format
         end_date = (end_date.strftime("%Y-%m-%d"))
 
+        #raise exception if no stock code is entered
+        if len(stock_name) == 0:
+            raise ValueError("Enter a stock code")
+
         # Retrieve stock data
-        stock_data = yf.download(stock_code, start_date, end_date)
+        stock_data = yf.download(stock_name, start_date, end_date)
 
         return stock_data
 
@@ -39,11 +58,142 @@ class prepare_data():
     svr_rbf = None
     lr = LinearRegression()
     future_dates = None
-    lr_df = None
-    svm_df = None
     lr_confidence = None
     svm_confidence = None
     lr_prediction = None
     svm_prediction = None
 
-    df = dataSet_obj.get_data("MSFT") #HARDCODED; CHANGE
+    df = None
+
+
+    def retrive_dataset(self):
+        self.df = self.dataSet_obj.get_data()
+
+        #raise exception if no data exists
+        if len(self.df) == 0:
+            raise ValueError("No data found, please try another stock")
+
+    def manipulate_data(self):
+        # Get the Adjusted Close Price
+        self.df = self.df[['Adj Close']]
+
+        #create prediction column from 'adj close' but shifted 'future_days' value
+        self.df['Prediction'] = self.df[['Adj Close']].shift(-self.parameters_obj.future_days)
+
+    def convert_data(self):
+        #create x dataset
+        self.x = np.array(self.df.drop(['Prediction'],1))
+
+        #Remove the 'future_days' rows from the end
+        self.x = self.x[:-self.parameters_obj.future_days]
+
+        #create y dataset
+        self.y = np.array(self.df['Prediction'])
+
+        self.y = self.y[:-self.parameters_obj.future_days]
+
+    def split_data(self):
+        # Split the data into 80% training and 20% testing
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.x, self.y, train_size=0.8, test_size=0.2)
+
+    def build_model(self):
+        #build and train SVM model
+        self.svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
+        self.svr_rbf.fit(self.x_train, self.y_train)
+
+        #train LR model
+        self.lr.fit(self.x_train, self.y_train)
+
+    def determine_confidence(self):
+        global confidence
+
+        #SVM confidence
+        self.svm_confidence = self.svr_rbf.score(self.x_test, self.y_test)
+        print("svm confidence: ", self.svm_confidence)
+
+        #LR confidence
+        self.lr_confidence = self.lr.score(self.x_test, self.y_test)
+        print("lr confidence: ", self.lr_confidence)
+
+
+    def generate_predictions(self):
+        # x_prediction to be the last 'future_days' rows of the adj close column
+        x_prediction = np.array(self.df.drop(['Prediction'],1))[-self.parameters_obj.future_days:]
+
+        self.lr_prediction = self.lr.predict(x_prediction)
+
+        self.svm_prediction = self.svr_rbf.predict(x_prediction)
+
+        #create future dates and add to dataframe
+        self.future_dates = pd.bdate_range(pd.datetime.today(), periods=30, weekmask=None)
+
+        global lr_df
+        global svm_df
+
+        lr_df = pd.DataFrame(data=self.lr_prediction, index=[self.future_dates],
+                                  columns=["LR Prediction"]).rename_axis("Date")
+        svm_df = pd.DataFrame(data=self.svm_prediction, index=[self.future_dates],
+                                   columns=["SVM Prediction"]).rename_axis("Date")
+
+
+    def graphing(self):
+        global lr_df
+        global svm_df
+
+        if self.lr_confidence > self.svm_confidence:
+            global confidence
+            confidence = round(self.lr_confidence * 100, 2)
+            print("Linear Regression model has a ", (self.lr_confidence - self.svm_confidence) * 100, "% higher confidence")
+            print(self.lr_prediction)
+            plt.plot(self.df['Adj Close'], color='black')
+            plt.plot(self.future_dates, lr_df, color='orange')
+            plt.ylabel("Price")
+            plt.xlabel("Date")
+            plt.show()
+        else:
+            confidence = round(self.svm_confidence * 100, 2)
+            print("Support Vector Machine has a ", (self.svm_confidence - self.lr_confidence) * 100, "% higher confidence")
+            print(self.svm_prediction)
+            plt.plot(self.df['Adj Close'], color='black')
+            plt.plot(self.future_dates, svm_df, color='orange')
+            plt.ylabel("Price")
+            plt.xlabel("Date")
+            plt.show()
+
+    def convert_df_export(self):
+       #SVM dataset
+        global svm_df
+        svm_df['Date'] = svm_df.index
+
+        #swap coloumn positions
+        columns_titles = ["Date", "SVM Prediction"]
+        svm_df = svm_df.reindex(columns=columns_titles)
+
+        #LR dataset
+        global lr_df
+        lr_df['Date'] = lr_df.index
+
+        # swap coloumn positions
+        columns_titles = ["Date", "LR Prediction"]
+        lr_df = lr_df.reindex(columns=columns_titles)
+
+class Compile():
+
+    #dataset_obj = DataSet()
+
+    def compile_predictions_regression(self, stock_code):
+        prepare_data_obj = prepare_data()
+
+        global stock_name
+        stock_name = stock_code
+
+        prepare_data_obj.retrive_dataset()
+        prepare_data_obj.manipulate_data()
+        prepare_data_obj.convert_data()
+        prepare_data_obj.split_data()
+        prepare_data_obj.build_model()
+        prepare_data_obj.determine_confidence()
+        prepare_data_obj.generate_predictions()
+        prepare_data_obj.graphing()
+        prepare_data_obj.convert_df_export()
+        # print(stock_code)
