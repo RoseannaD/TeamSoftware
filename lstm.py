@@ -7,6 +7,7 @@ from keras.models import Sequential, load_model
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
+import socket
 
 #global variable to store user's stock they want to analyse using LSTM
 selected_stock_var = 0
@@ -80,17 +81,14 @@ class prepare_data:
 
         #load the correct model based on the selected stock
         if selected_stock_var == "AMD":
-            #need to change to relative path and load correct model
             self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
                            'dropout_layers_0.4_0.4/best_model.h5')
 
         if selected_stock_var == "PFE":
-            #need to change to relative path and load correct model
             self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
                            'dropout_layers_0.4_0.4/best_model.h5')
 
         if selected_stock_var == "RYCEY":
-            #need to change to relative path
             self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
                            'dropout_layers_0.4_0.4/best_model.h5')
 
@@ -176,7 +174,7 @@ class prepare_data:
         forecast['Date'] = forecast.index
 
         # swap coloumn positions
-        columns_titles = ["Date", "LSTM Prediction"]
+        columns_titles = ["Date", "LSTM Predictions"]
         forecast = forecast.reindex(columns=columns_titles)
 
 class Compile:
@@ -185,14 +183,43 @@ class Compile:
     dataset_obj = dataset()
     prepare_data_obj = prepare_data()
 
-    def compile_predictions_lstm(self):
+    #function to check internet conectivity by pinging Google's DNS server
+    def internet_check(self, host="8.8.8.8", port=53, timeout=3):
+        """
+        Host: 8.8.8.8 (google-public-dns-a.google.com)
+        OpenPort: 53/tcp
+        Service: domain (DNS/TCP)
+        """
+        try:
+            socket.setdefaulttimeout(timeout)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+            return True
+        except socket.error as ex:
+            return False
 
-        self.dataset_obj.get_data()
-        self.prepare_data_obj.load_correct_model()
-        self.prepare_data_obj.manipulate_raw_data()
-        self.prepare_data_obj.split_data()
-        self.prepare_data_obj.normalise_data()
-        self.prepare_data_obj.generate_predictions()
-        self.prepare_data_obj.inverse_transform()
-        self.prepare_data_obj.graphing()
-        self.prepare_data_obj.convert_df_export()
+    def compile_predictions_lstm(self):
+        if self.internet_check() == 0:
+            raise Exception("No internet connectivity")
+        else:
+            self.dataset_obj.get_data()
+            self.prepare_data_obj.load_correct_model()
+            self.prepare_data_obj.manipulate_raw_data()
+            self.prepare_data_obj.split_data()
+            self.prepare_data_obj.normalise_data()
+            self.prepare_data_obj.generate_predictions()
+            self.prepare_data_obj.inverse_transform()
+            self.prepare_data_obj.graphing()
+
+
+    def compile_predictions_lstm_export(self):
+        if self.internet_check() == 0:
+            raise Exception("No internet connectivity")
+        else:
+            self.dataset_obj.get_data()
+            self.prepare_data_obj.load_correct_model()
+            self.prepare_data_obj.manipulate_raw_data()
+            self.prepare_data_obj.split_data()
+            self.prepare_data_obj.normalise_data()
+            self.prepare_data_obj.generate_predictions()
+            self.prepare_data_obj.inverse_transform()
+            self.prepare_data_obj.convert_df_export()
