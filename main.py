@@ -77,8 +77,9 @@ class App(tk.Tk):
             messagebox.showerror("Error", "No internet connectivity. Please check your network settings")
 
 class StartPage(tk.Frame):
-
-    logo_img = "/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/Source/assets/futuremetric.png"
+       
+    #need to change to relative path
+    logo_img = "/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/Source/assets/futuremetric.png" 
     logo_img_resized = None
 
     def __init__(self, master):
