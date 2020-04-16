@@ -158,6 +158,7 @@ class prepare_data():
             plt.plot(self.future_dates, lr_df, color='orange')
             plt.ylabel("Price")
             plt.xlabel("Date")
+            plt.legend(['Historical Data', 'LR Forecast'], loc='upper left')  # Legend
             plt.show()
         else:
             confidence = round(svm_confidence * 100, 2)
@@ -167,6 +168,7 @@ class prepare_data():
             plt.plot(self.future_dates, svm_df, color='orange')
             plt.ylabel("Price")
             plt.xlabel("Date")
+            plt.legend(['Historical Data', 'SVM forecast'], loc='upper left')  # Legend
             plt.show()
 
     def convert_df_export(self):
@@ -192,11 +194,7 @@ class Compile():
 
     #function to check internet conectivity by pinging Google's DNS server
     def internet_check(self, host="8.8.8.8", port=53, timeout=3):
-        """
-        Host: 8.8.8.8 (google-public-dns-a.google.com)
-        OpenPort: 53/tcp
-        Service: domain (DNS/TCP)
-        """
+
         try:
             socket.setdefaulttimeout(timeout)
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
@@ -241,4 +239,5 @@ class Compile():
             prepare_data_obj.determine_confidence()
             prepare_data_obj.generate_predictions()
             prepare_data_obj.convert_df_export()
+
 
