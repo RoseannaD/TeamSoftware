@@ -20,7 +20,7 @@ class Dataset:
 
         # parse current date in the right format
         # end_date = date.today()
-        end_date = parser.parse(end_date)
+        end_date = parser.parse(end_date, dayfirst=True)
 
         # minus 6 months from current date and convert to correct format
         start_date = end_date - dateutil.relativedelta.relativedelta(months=6)
@@ -77,7 +77,7 @@ class Prepare_Data:
         plt.axhspan(self.level2, self.level1, alpha=0.5, color='papayawhip')
         plt.axhspan(self.level3, self.level2, alpha=0.5, color='lightgreen')
         plt.axhspan(self.maximum_price, self.level3, alpha=0.5, color='lightskyblue')
-
+        plt.legend(['Historical Data'], loc='upper left')  # Legend
         plt.ylabel("Price")
         plt.xlabel("Date")
         plt.legend(loc=2)
@@ -87,11 +87,7 @@ class Compile:
 
     # function to check internet conectivity by pinging Google's DNS server
     def internet_check(self, host="8.8.8.8", port=53, timeout=3):
-        """
-        Host: 8.8.8.8 (google-public-dns-a.google.com)
-        OpenPort: 53/tcp
-        Service: domain (DNS/TCP)
-        """
+
         try:
             socket.setdefaulttimeout(timeout)
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
