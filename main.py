@@ -21,9 +21,10 @@ from PIL import ImageTk, Image
 import socket
 from openpyxl import Workbook
 import sys
+from dateutil import parser
 
 import regression as rg
-import lstm as lstm
+import lstm
 import Fibonacci as fib
 import analysis as ays
 
@@ -39,23 +40,14 @@ class App(tk.Tk):
 
     #function to check internet conectivity by pinging Google's DNS server
     def internet_check(self, host="8.8.8.8", port=53, timeout=3):
-        """
-        Host: 8.8.8.8 (google-public-dns-a.google.com)
-        OpenPort: 53/tcp
-        Service: domain (DNS/TCP)
-        """
         try:
             socket.setdefaulttimeout(timeout)
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
             return True
         except socket.error as ex:
-            #print(ex)
-            #messagebox.showerror("Error", "No internet connectivity. Please check your network settings")
             return False
 
     def show_error(self, *args):
-        error = traceback.format_exception(*args)
-        #messagebox.showerror('Exception', error)
 
         title = 'Error'
         sys.tracebacklimit = 1
@@ -133,25 +125,35 @@ class LSTM(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
 
+        # label
+        tk.Label(self, text='LSTM', font='Helvetica 18 bold').grid(row=0, column=0)
+
         #available stocks list
-        stocks_list = ["AMD", "PFE", "RYCEY"]
+        stocks_list = ["INTC", "PFE", "RYCEY"]
 
         selected_stock = tk.StringVar(self)
         selected_stock.set(stocks_list[0])
+
+        #select stock code' text
+        tk.Label(self, text="Select stock code").grid(row=3, column=0)
 
         #dropdown with stocks_list
         opt = tk.OptionMenu(self,  selected_stock, *stocks_list)
         opt.config(width=20, font=('Helvetica', 12))
         opt.grid(row=3, column=1)
 
-        #select stock code' text
-        tk.Label(self, text="Select stock code").grid(row=3, column=0)
+        #model date
+        var = tk.StringVar()
+        tk.Label(self, text="Model last updated").grid(row=3, column=3)
+        tk.Label(self, textvariable = var).grid(row=4, column=3)
 
         #function to get selected stock and generate predictions
         def compile_predictions():
             #global selected_stock_var
             lstm.selected_stock_var = selected_stock.get()
             self.compile.compile_predictions_lstm()
+            var.set(parser.parse(lstm.model_date_g, dayfirst=True).strftime("%d-%m-%Y"))
+
 
         #button to run compile_predictions function to generate predictions
         compile_pred = tk.Button(self, text="Graph data", command=lambda : compile_predictions())
@@ -181,19 +183,6 @@ class Regression(tk.Frame):
         else:
             rg.lr_df.to_excel(file_location, index=False, header=True)
 
-    def compile_regression(self):
-
-        # run regression code
-        self.compile.compile_predictions_regression(self.e_stock_code.get())
-
-        # # display model confidence level
-        # self.rg_regression.configure("Confidence Level " + str(rg.confidence) + "%")
-
-        # show confidence
-        #self.rg_regression = tk.Label(self, text="Confidence Level " + str(rg.confidence) + "%").grid(row=4, column=2)
-
-        # show table
-        # self.show_table()
 
 
     def __init__(self, master):
@@ -203,12 +192,24 @@ class Regression(tk.Frame):
         tk.Label(self, text='SVM & LR', font='Helvetica 18 bold').grid(row=0, column=0)
 
         #enter stock code label
-        tk.Label(self, text="Enter stock code").grid(row=2, column=0)
+        tk.Label(self, text="Enter stock code").grid(row=2, column=0, sticky=tk.E)
         self.e_stock_code = tk.Entry(self)
         self.e_stock_code.grid(row=2, column=1)
 
+        #model date
+        var = tk.StringVar()
+        tk.Label(self, text="Model confidence level").grid(row=3, column=3)
+        tk.Label(self, textvariable = var).grid(row=4, column=3)
+
+        def compile_regression():
+            # run regression code
+            self.compile.compile_predictions_regression(self.e_stock_code.get())
+
+            var.set(str(rg.confidence) + "%")
+
+
         #show graph
-        show_graph = tk.Button(self, text="Graph data", command=lambda: self.compile_regression())
+        show_graph = tk.Button(self, text="Graph data", command=lambda: compile_regression())
         show_graph.grid(row=4, column=1)
 
         #export to excel
@@ -222,6 +223,8 @@ class Regression(tk.Frame):
         #label
         tk.Label(self, text='Both SVM & LR models will be calculated and the model \n'
                             'with the highest confidence will be displayed').grid(row=6, column=0)
+
+
 
         #button to go back to home screen
         tk.Button(self, text="Home", command=lambda: master.switch_frame(StartPage)).grid(row=7, column=1)
@@ -285,7 +288,10 @@ class Graphing(tk.Frame):
         ays.atr = self.atr_check.get()
 
         #store period
-        ays.period = int(self.period.get())
+        if len(self.period.get()) > 0:
+            ays.period = int(self.period.get())
+        else:
+            raise Exception("Period is empty")
 
         #get and store if checkboxes are true or false
         ays.bb = self.bb_check.get()
@@ -419,4 +425,3 @@ class TopErrorWindow(tk.Toplevel):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
