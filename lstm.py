@@ -8,12 +8,16 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 import socket
+from dateutil import parser
 
 #global variable to store user's stock they want to analyse using LSTM
 selected_stock_var = 0
 
 #global variable to store predictions
 forecast = "a"
+
+#model date
+model_date_g = "a"
 
 class parameters:
 
@@ -22,15 +26,21 @@ class parameters:
 
 class dataset:
 
-    def get_data(self):
+    def get_data(self, end_date):
         global selected_stock_var
+        global model_date_g
+
+        model_date_g = end_date
+
+        end_date = parser.parse(end_date, dayfirst=True).strftime("%Y-%m-%d")
+        print(end_date)
 
         #get historical data for selected stock
-        #AMD stock
-        if selected_stock_var == "AMD":
-            stock_code = "AMD"
-            start_date = "2005-01-01"
-            end_date = "2020-04-10"  # 2020-04-09
+        #INTC stock
+        if selected_stock_var == "INTC":
+            stock_code = "INTC"
+            start_date = "1981-01-01"
+            #end_date = "2020-04-16"  # 2020-04-09
 
             df = yf.download(stock_code, start_date, end_date)
             return df
@@ -38,7 +48,7 @@ class dataset:
         #PFE stock
         if selected_stock_var == "PFE":
             stock_code = "PFE"
-            start_date = "2005-01-01"
+            start_date = "1973-01-01"
             end_date = "2020-04-10"  # 2020-04-09
 
             df = yf.download(stock_code, start_date, end_date)
@@ -48,7 +58,7 @@ class dataset:
         if selected_stock_var == "RYCEY":
             stock_code = "RYCEY"
             start_date = "2005-01-01"
-            end_date = "2020-04-13"  # 2020-04-09
+            #end_date = "2020-04-13"  # 2020-04-09
 
             df = yf.download(stock_code, start_date, end_date)
             return df
@@ -60,8 +70,6 @@ class prepare_data:
     parameters_obj = parameters()
     dataset_obj = dataset()
 
-    df = dataset_obj.get_data()
-
     scaler = None
     close_df = None
     close_test = None
@@ -72,30 +80,48 @@ class prepare_data:
     date_val = None
     x_close_train = None
     x_close_test = None
+    df = None
 
     selected_stock = None
+
+    model_date = None
+
+    intc = '../Source/assets/models/intc_16-04-20.h5'
+    pfe = '../Source/assets/models/pfe_16-04-20.h5'
+    rycey = "../Source/assets/models/rycey_08-04-20.h5"
+
+    def extract_model_date(self):
+        #extract date from filename
+        if selected_stock_var == "INTC":
+            self.model_date = self.intc[(self.intc.find('_') + 1): (self.intc.find('_') + 9)]
+
+        if selected_stock_var == "PFE":
+            self.model_date = self.pfe[(self.pfe.find('_') + 1): (self.pfe.find('_') + 9)]
+
+        if selected_stock_var == "RYCEY":
+            self.model_date = self.rycey[(self.rycey.find('_') + 1): (self.rycey.find('_') + 9)]
 
     def load_correct_model(self):
 
         global selected_stock_var
 
         #load the correct model based on the selected stock
-        if selected_stock_var == "AMD":
-            self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
-                           'dropout_layers_0.4_0.4/best_model.h5')
+        if selected_stock_var == "INTC":
+            self.model = load_model(self.intc)
 
         if selected_stock_var == "PFE":
-            self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
-                           'dropout_layers_0.4_0.4/best_model.h5')
+            self.model = load_model(self.pfe)
 
         if selected_stock_var == "RYCEY":
-            self.model = load_model('/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.65/outputs/lstm_best_7-3-19_12AM/'
-                           'dropout_layers_0.4_0.4/best_model.h5')
+            self.model = load_model(self.rycey)
+
+    def retrieve_dataset(self):
+        self.df = self.dataset_obj.get_data(self.model_date)
 
 
     def manipulate_raw_data(self):
         #convert raw dataset's index to a column
-        self.df = self.dataset_obj.get_data()
+        #self.df = self.dataset_obj.get_data()
         self.df['Date'] = self.df.index
 
         #drop data that is not needed from dataset
@@ -185,11 +211,6 @@ class Compile:
 
     #function to check internet conectivity by pinging Google's DNS server
     def internet_check(self, host="8.8.8.8", port=53, timeout=3):
-        """
-        Host: 8.8.8.8 (google-public-dns-a.google.com)
-        OpenPort: 53/tcp
-        Service: domain (DNS/TCP)
-        """
         try:
             socket.setdefaulttimeout(timeout)
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
@@ -201,8 +222,9 @@ class Compile:
         if self.internet_check() == 0:
             raise Exception("No internet connectivity")
         else:
-            self.dataset_obj.get_data()
+            self.prepare_data_obj.extract_model_date()
             self.prepare_data_obj.load_correct_model()
+            self.prepare_data_obj.retrieve_dataset()
             self.prepare_data_obj.manipulate_raw_data()
             self.prepare_data_obj.split_data()
             self.prepare_data_obj.normalise_data()
@@ -215,8 +237,9 @@ class Compile:
         if self.internet_check() == 0:
             raise Exception("No internet connectivity")
         else:
-            self.dataset_obj.get_data()
+            self.prepare_data_obj.extract_model_date()
             self.prepare_data_obj.load_correct_model()
+            self.prepare_data_obj.retrieve_dataset()
             self.prepare_data_obj.manipulate_raw_data()
             self.prepare_data_obj.split_data()
             self.prepare_data_obj.normalise_data()
