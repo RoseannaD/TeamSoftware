@@ -58,6 +58,7 @@ class App(tk.Tk):
         #messagebox.showerror('Exception', error)
 
         title = 'Error'
+        sys.tracebacklimit = 1
         detail = traceback.format_exc()
 
         sys.tracebacklimit = 0
@@ -418,3 +419,4 @@ class TopErrorWindow(tk.Toplevel):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+
