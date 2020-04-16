@@ -9,7 +9,7 @@ start_date = "01-01-2019"
 end_date = "31-12-2019"
 stock_code = "AMD"
 period = 5
-lookback = 5
+
 
 bb = "a"
 roi = "a"
@@ -72,6 +72,9 @@ class Prepare_data:
 
     def retrive_dataset(self):
         self.df = self.DataSet_Obj.get_data()
+        # raise exception if no data exists
+        if len(self.df) == 0:
+            raise ValueError("No data found, please try another stock")
 
     def add_timestamp_df(self):
         self.df['Timestamp'] = self.df.index
@@ -98,13 +101,13 @@ class Prepare_data:
         global lookback
         self.df['williams r'] = ta.momentum.wr(high=self.df['High'], low=self.df['Low'], close=self.df['Close'], lbp=period)
 
-
     def graphing_all_bb(self):
         #bollinger bands
         plt.plot(self.df['Close'], color='green')
         plt.plot(self.df['bb_mavg'], color='red')
         plt.plot(self.df['bb_hband'], color='red')
         plt.plot(self.df['bb_lband'], color='red')
+        plt.legend(['Historical Data', 'Bollinger bands'], loc='upper left')  # Legend
         plt.show()
 
     def graphing_roi(self):
@@ -112,13 +115,17 @@ class Prepare_data:
         fig, axs = plt.subplots(2)
         axs[0].plot(self.df['Close'], color='green')
         axs[1].plot(self.df['roi'], color='red')
+        axs[0].legend(['Historical Data'], loc='upper left')  # Legend
+        axs[1].legend(['ROI'], loc='upper left')  # Legend
         plt.show()
 
     def graphing_average_true_range(self):
         #rate of change
         fig, axs = plt.subplots(2)
         axs[0].plot(self.df['Close'], color='green')
+        axs[0].legend(['Historical Data'], loc='upper left')  # Legend
         axs[1].plot(self.df['atr'], color='red')
+        axs[1].legend(['ATR'], loc='upper left')  # Legend
         plt.show()
 
     def graphing_williams_r(self):
@@ -127,7 +134,9 @@ class Prepare_data:
         axs[0].plot(self.df['Close'], color='green')
         axs[1].plot(self.df['williams r'], color='red')
         plt.axhline(y=-20, color='b', linestyle=':')
+        axs[0].legend(['Historical Data'], loc='upper left')  # Legend
         plt.axhline(y=-80, color='b', linestyle=':')
+        axs[1].legend(['Williams %R'], loc='upper left')  # Legend
         plt.show()
 
 
@@ -137,11 +146,7 @@ class Compile:
 
     # function to check internet conectivity by pinging Google's DNS server
     def internet_check(self, host="8.8.8.8", port=53, timeout=3):
-        """
-        Host: 8.8.8.8 (google-public-dns-a.google.com)
-        OpenPort: 53/tcp
-        Service: domain (DNS/TCP)
-        """
+
         try:
             socket.setdefaulttimeout(timeout)
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
@@ -169,21 +174,26 @@ class Compile:
                 print("BB")
 
             if roi == 1:
-                # raise exception if no stock code is entered
-                if len(str(period)) == 0:
-                    raise ValueError("Period is missing")
-                self.prepare_data_obj.rate_of_change()
-                self.prepare_data_obj.graphing_roi()
-                print("ROI")
+                #raise exception if period is empty
+                if period <= 3:
+                    raise Exception("Period cannot be less than 4")
+                else:
+                    self.prepare_data_obj.rate_of_change()
+                    self.prepare_data_obj.graphing_roi()
+                    print("ROI")
 
             if atr == 1:
-                if len(str(period)) == 0:
-                    raise ValueError("Period is missing")
-                self.prepare_data_obj.average_true_range()
-                self.prepare_data_obj.graphing_average_true_range()
+                # raise exception if period is empty
+                if period <= 3:
+                    raise Exception("Period cannot be less than 4")
+                else:
+                    self.prepare_data_obj.average_true_range()
+                    self.prepare_data_obj.graphing_average_true_range()
 
             if will_r == 1:
-                if len(str(period)) == 0:
-                    raise ValueError("Period is missing")
-                self.prepare_data_obj.williams_r()
-                self.prepare_data_obj.graphing_williams_r()
+                # raise exception if period is empty
+                if period <= 3:
+                    raise Exception("Period cannot be less than 4")
+                else:
+                    self.prepare_data_obj.williams_r()
+                    self.prepare_data_obj.graphing_williams_r()
