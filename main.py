@@ -22,7 +22,6 @@ import socket
 from openpyxl import Workbook
 import sys
 
-
 import regression as rg
 import lstm as lstm
 import Fibonacci as fib
@@ -70,21 +69,15 @@ class App(tk.Tk):
 
     def switch_frame(self, frame_class):
         new_frame = frame_class(self)
-        #internet connectivity check
-        if self.internet_check() == 0:
-            messagebox.showerror("Error", "No internet connectivity. Please check your network settings")
-        else:
-            if self._frame is not None:
-                self._frame.destroy()
-
-            self._frame = new_frame
-            self._frame.grid()
-
+        if self._frame is not None:
+            self._frame.destroy()
+        self._frame = new_frame
+        self._frame.grid()
 
 
 class StartPage(tk.Frame):
 
-    logo_img = "/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/Source/assets/futuremetric.png"
+    logo_img = "../Source/assets/futuremetric.png"
     logo_img_resized = None
 
     def __init__(self, master):
