@@ -98,12 +98,13 @@ class StartPage(tk.Frame):
                     "The goal of this application is to provide an additional tool for investors to use "
                     "when deciding whether to invest or not.").grid(row=0, column=1)
 
+        tk.Label(self, text="FutureMetric Public Beta v0.1", font='Helvetica 10').grid(row=5, column=2)
+
         #buttons
         tk.Button(self, text="LSTM", command=lambda: master.switch_frame(LSTM)).grid(row=1, column=1)
         tk.Button(self, text="Regression", command=lambda: master.switch_frame(Regression)).grid(row=2, column=1)
         tk.Button(self, text="Fibonacci", command=lambda: master.switch_frame(Fibonacci)).grid(row=3, column=1)
         tk.Button(self, text="Analysis", command=lambda: master.switch_frame(Graphing)).grid(row=4, column=1)
-        #tk.Button(self, text="License", command=lambda: master.switch_frame(License)).grid(row=5, column=1)
 
         #menubar
         menubar = tk.Menu(master)
@@ -425,3 +426,4 @@ class TopErrorWindow(tk.Toplevel):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+
