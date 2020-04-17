@@ -1,5 +1,4 @@
 # need to use Python 3.7.5 due to tensorflow. 
-
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -32,6 +31,7 @@ class dataset:
 
         model_date_g = end_date
 
+
         end_date = parser.parse(end_date, dayfirst=True).strftime("%Y-%m-%d")
         print(end_date)
 
@@ -49,7 +49,7 @@ class dataset:
         if selected_stock_var == "PFE":
             stock_code = "PFE"
             start_date = "1973-01-01"
-            end_date = "2020-04-10"  # 2020-04-09
+            #end_date = "2020-04-10"  # 2020-04-09
 
             df = yf.download(stock_code, start_date, end_date)
             return df
