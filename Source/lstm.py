@@ -2,6 +2,7 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import tensorflow as tf
 from keras.models import Sequential, load_model
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
@@ -86,9 +87,9 @@ class prepare_data:
 
     model_date = None
 
-    intc = '../Source/assets/models/intc_16-04-20.h5'
-    pfe = '../Source/assets/models/pfe_16-04-20.h5'
-    rycey = "../Source/assets/models/rycey_08-04-20.h5"
+    intc = 'Source/assets/models/intc_16-04-20.h5'
+    pfe = 'Source/assets/models/pfe_16-04-20.h5'
+    rycey = "Source/assets/models/rycey_08-04-20.h5"
 
     def extract_model_date(self):
         #extract date from filename
