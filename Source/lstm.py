@@ -87,9 +87,23 @@ class prepare_data:
 
     model_date = None
 
-    intc = 'Source/assets/models/intc_16-04-20.h5'
-    pfe = 'Source/assets/models/pfe_16-04-20.h5'
-    rycey = "Source/assets/models/rycey_08-04-20.h5"
+    import os
+    dirname = os.path.dirname(__file__)
+    #filename = os.path.join(dirname, 'assets/models')
+
+    import sys, os
+    if getattr(sys, 'frozen', False):
+        # If the application is run as a bundle, the pyInstaller bootloader
+        # extends the sys module by a flag frozen=True and sets the app
+        # path into variable _MEIPASS'.
+        application_path = sys._MEIPASS
+    else:
+        application_path = os.path.dirname(os.path.abspath(__file__))
+    filename = os.path.join(application_path, 'assets/models')
+
+    intc = "/intc_16-04-20.h5"
+    pfe = "/pfe_16-04-20.h5"
+    rycey = "/rycey_08-04-20.h5"
 
     def extract_model_date(self):
         #extract date from filename
@@ -108,13 +122,13 @@ class prepare_data:
 
         #load the correct model based on the selected stock
         if selected_stock_var == "INTC":
-            self.model = load_model(self.intc)
+            self.model = load_model(self.filename + self.intc)
 
         if selected_stock_var == "PFE":
-            self.model = load_model(self.pfe)
+            self.model = load_model(self.filename + self.pfe)
 
         if selected_stock_var == "RYCEY":
-            self.model = load_model(self.rycey)
+            self.model = load_model(self.filename + self.rycey)
 
     def retrieve_dataset(self):
         self.df = self.dataset_obj.get_data(self.model_date)
