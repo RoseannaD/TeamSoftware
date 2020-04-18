@@ -13,20 +13,35 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """""
-
+from PIL import ImageTk, Image
 import tkinter as tk
 from tkinter import filedialog, messagebox, font
 import traceback
-from PIL import ImageTk, Image
-import socket
 from openpyxl import Workbook
 import sys
+
+import socket
 from dateutil import parser
+
 
 import regression as rg
 import lstm
 import Fibonacci as fib
 import analysis as ays
+
+import os
+dirname = os.path.dirname(__file__)
+
+
+import sys, os
+if getattr(sys, 'frozen', False):
+    # If the application is run as a bundle, the pyInstaller bootloader
+    # extends the sys module by a flag frozen=True and sets the app
+    # path into variable _MEIPASS'.
+    application_path = sys._MEIPASS
+else:
+    application_path = os.path.dirname(os.path.abspath(__file__))
+filename = os.path.join(application_path, 'Source/assets')
 
 # GUI CODE BELOW#
 
@@ -70,7 +85,7 @@ class App(tk.Tk):
 
 class StartPage(tk.Frame):
 
-    logo_img = "../Source/assets/futuremetric.png"
+    logo_img = filename + "/futuremetric.png"
     logo_img_resized = None
 
     def __init__(self, master):
@@ -426,4 +441,3 @@ class TopErrorWindow(tk.Toplevel):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
