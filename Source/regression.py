@@ -239,6 +239,3 @@ class Compile():
             prepare_data_obj.determine_confidence()
             prepare_data_obj.generate_predictions()
             prepare_data_obj.convert_df_export()
-
-
-
