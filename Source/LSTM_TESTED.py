@@ -1,4 +1,6 @@
 # Not part of GUI, only used to build .h5 model to load into LSTM.py file
+#update OUTPUT_PATH to your local file location
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
