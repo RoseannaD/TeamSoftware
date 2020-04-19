@@ -17,7 +17,7 @@ class parameters:
     time_steps = 15
     batch_size = 20
     lr = 0.00010000
-    epochs = 30
+    epochs = 300
     future_days = 30 #how many days to predict ahead of the last date from the training dataset
 
 class dataset:
