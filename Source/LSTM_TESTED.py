@@ -52,11 +52,11 @@ def graphing():
     plt.figure()
     plt.plot(date_train, close_train, color='black')
     plt.plot(reduce_date_range(date_test, prediction), prediction, color='orange')
-    plt.plot(date_val, close_train_val, color='green')
-    plt.plot(date_val, close_train_val_raw, color='black')
+    #plt.plot(date_val, close_train_val, color='green')
+    #plt.plot(date_val, close_train_val_raw, color='black')
     plt.plot(date_test, close_test, color='red')
     plt.plot(forecast_dates, forecast, color='blue')
-    plt.legend(['Data', 'Prediction', 'Validation' 'Ground Truth', 'Future Prediction'], loc='upper left')  # Legend
+    plt.legend(['Data', 'Prediction', 'Raw Data', 'Future Prediction'], loc='upper left')  # Legend
     plt.show()
 
 OUTPUT_PATH = "/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.67"
