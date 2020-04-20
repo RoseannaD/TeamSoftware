@@ -59,6 +59,8 @@ def graphing():
     plt.plot(date_test, close_test, color='red')
     plt.plot(forecast_dates, forecast, color='blue')
     plt.legend(['Data', 'Prediction', 'Raw Data', 'Future Prediction'], loc='upper left')  # Legend
+    plt.ylabel('Price')
+    plt.xlabel('Date')
     plt.show()
 
 OUTPUT_PATH = "/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.67"
