@@ -62,6 +62,15 @@ def graphing():
     plt.ylabel('Price')
     plt.xlabel('Date')
     plt.show()
+    
+    plt.figure()
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Val', 'Test'], loc='upper left')
+    plt.show()
 
 OUTPUT_PATH = "/Users/riteshsookun/OneDrive/Uni/Coding Projects/LSTM/new_5.67"
 
