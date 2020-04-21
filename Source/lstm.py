@@ -8,7 +8,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 import socket
-from dateutil import parser
+import dateutil.relativedelta
+from datetime import *
 
 #global variable to store user's stock they want to analyse using LSTM
 selected_stock_var = 0
@@ -26,14 +27,13 @@ class parameters:
 
 class dataset:
 
-    def get_data(self, end_date):
+    def get_data(self):
         global selected_stock_var
-        global model_date_g
-
-        model_date_g = end_date
 
 
-        end_date = parser.parse(end_date, dayfirst=True).strftime("%Y-%m-%d")
+
+        #end_date = parser.parse(end_date, dayfirst=True).strftime("%Y-%m-%d")
+        end_date = date.today()
         print(end_date)
 
         #get historical data for selected stock
@@ -41,7 +41,7 @@ class dataset:
         if selected_stock_var == "INTC":
             stock_code = "INTC"
             start_date = "1981-01-01"
-            #end_date = "2020-04-16"  # 2020-04-09
+            # end_date = "2020-04-16"  # 2020-04-09
 
             df = yf.download(stock_code, start_date, end_date)
             return df
@@ -116,6 +116,10 @@ class prepare_data:
         if selected_stock_var == "RYCEY":
             self.model_date = self.rycey[(self.rycey.find('_') + 1): (self.rycey.find('_') + 9)]
 
+        global model_date_g
+
+        model_date_g = self.model_date
+
     def load_correct_model(self):
 
         global selected_stock_var
@@ -131,7 +135,7 @@ class prepare_data:
             self.model = load_model(self.filename + self.rycey)
 
     def retrieve_dataset(self):
-        self.df = self.dataset_obj.get_data(self.model_date)
+        self.df = self.dataset_obj.get_data()
 
 
     def manipulate_raw_data(self):
@@ -204,6 +208,8 @@ class prepare_data:
         plt.plot(self.df['Date'], self.close_df, color='black')
         plt.plot(self.forecast_dates, forecast, color='blue')
         plt.legend(['Historical Data', 'Forecast'], loc='upper left')  # Legend
+        plt.xlabel('Price')
+        plt.ylabel('Date')
         plt.show()
 
     def convert_df_export(self):
