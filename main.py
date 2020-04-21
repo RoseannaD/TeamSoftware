@@ -113,7 +113,7 @@ class StartPage(tk.Frame):
                     "The goal of this application is to provide an additional tool for investors to use "
                     "when deciding whether to invest or not.").grid(row=0, column=1)
 
-        tk.Label(self, text="FutureMetric Public Beta v0.1", font='Helvetica 10').grid(row=5, column=2)
+        tk.Label(self, text="FutureMetric v0.1", font='Helvetica 10').grid(row=5, column=2)
 
         #buttons
         tk.Button(self, text="LSTM", command=lambda: master.switch_frame(LSTM)).grid(row=1, column=1)
