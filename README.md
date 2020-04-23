@@ -9,9 +9,9 @@ Known bugs:
 * 'Model confidence level' does not update for Regression
          
 Proposed updated/improvements:
-Markup : * Reduce LSTM overfitting to reduce error rate <10%
-         * Improve help documentation
-         * Add more stocks to predict using LSTM
-         * Release a Mac version of FutureMetric
+* Reduce LSTM overfitting to reduce error rate <10%
+* Improve help documentation
+* Add more stocks to predict using LSTM
+* Release a Mac version of FutureMetric
 
  
