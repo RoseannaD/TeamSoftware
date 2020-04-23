@@ -14,4 +14,4 @@ Proposed updated/improvements:
 * Add more stocks to predict using LSTM
 * Release a Mac version of FutureMetric
 
- ![Home Screen](https://raw.githubusercontent.com/RoseannaD/TeamSoftware/master/Images/GUI/Home.PNG)
+ ![Home Screen](https://raw.githubusercontent.com/RoseannaD/TeamSoftware/master/Images/GUI/Home.PNG "Home Screen")
