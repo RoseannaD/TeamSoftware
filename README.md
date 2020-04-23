@@ -15,7 +15,8 @@ Proposed updated/improvements:
 * Release a Mac version of FutureMetric
 
  ![Home Screen](https://raw.githubusercontent.com/RoseannaD/TeamSoftware/master/Images/GUI/Home.PNG "Home Screen")
- 
+ Home Screen
 
  
   ![LSTM Prediction](https://github.com/RoseannaD/TeamSoftware/blob/master/Images/LSTM/LSTM_graph_zoom.PNG?raw=true "LSTM Prediction")
+LSTM Prediction Results
